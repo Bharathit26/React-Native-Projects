@@ -23,10 +23,11 @@ const Login = () => {
   const [isFocusedPassword, setIsFocusedPassword] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     let valid = true;
     let newErrors = { email: "", password: "" };
 
+    // Client-side validation
     if (!email.trim()) {
       newErrors.email = "*Email is required";
       valid = false;
@@ -41,10 +42,31 @@ const Login = () => {
     }
 
     setErrors(newErrors);
+    if (!valid) return;
 
-    if (valid) {
-      console.log("Login Attempt:", email);
-      Alert.alert("Login Successful", "Welcome back to ChanRe!");
+    // --- Backend API call ---
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Show error returned from backend
+        Alert.alert("Login Failed", data.message || "Invalid credentials");
+        return;
+      }
+
+      // Success
+      Alert.alert("Login Successful", `Welcome back, ${data.fullName || ""}!`);
+      // You can navigate to the main page here
+      // router.replace("/home"); // if using expo-router
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Unable to connect to server");
     }
   };
 

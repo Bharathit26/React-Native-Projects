@@ -35,11 +35,11 @@ export default function Register() {
   });
 
   const router = useRouter();
-
-  const handleRegister = () => {
+  const handleRegister = async () => {
     let valid = true;
     let newErrors = { name: "", email: "", password: "", confirm: "" };
 
+    // Client-side validation
     if (!fullName.trim()) {
       newErrors.name = "*Full name is required";
       valid = false;
@@ -69,11 +69,35 @@ export default function Register() {
     setErrors(newErrors);
     if (!valid) return;
 
-    Alert.alert(
-      "Registration Successful",
-      "A link has been sent to your email.",
-      [{ text: "OK", onPress: () => router.replace("/login") }],
-    );
+    // --- Backend API call ---
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Show error returned from backend
+        Alert.alert(
+          "Registration Failed",
+          data.message || "Something went wrong",
+        );
+        return;
+      }
+
+      // Success
+      Alert.alert(
+        "Registration Successful",
+        data.message || "Account created successfully",
+        [{ text: "OK", onPress: () => router.replace("/login") }],
+      );
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Unable to connect to server");
+    }
   };
 
   return (

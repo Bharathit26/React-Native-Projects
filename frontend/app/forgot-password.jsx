@@ -24,7 +24,7 @@ export default function ForgotPassword() {
 
   const router = useRouter();
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (!email.trim()) {
       setError("*Email is required");
       return;
@@ -37,9 +37,33 @@ export default function ForgotPassword() {
     }
 
     setError("");
-    Alert.alert("Reset Sent", "Check your email for a reset link.", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/auth/forgot-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        Alert.alert("Error", data.message || "Something went wrong");
+        return;
+      }
+
+      Alert.alert(
+        "Reset Sent",
+        data.message || "Check your email for a reset link.",
+        [{ text: "OK", onPress: () => router.back() }],
+      );
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Unable to connect to server");
+    }
   };
 
   return (
