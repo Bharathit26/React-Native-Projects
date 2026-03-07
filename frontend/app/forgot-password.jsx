@@ -40,7 +40,7 @@ export default function ForgotPassword() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/forgot-password",
+        "http://192.168.31.231:5000/api/auth/forgot-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
+    maxWidth: 420,
     backgroundColor: Colors.card,
     borderRadius: 20,
     padding: 28,
